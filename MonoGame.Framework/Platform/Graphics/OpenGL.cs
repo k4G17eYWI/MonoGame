@@ -441,7 +441,7 @@ namespace MonoGame.OpenGL
         Rgba16f = 0x881A,
         R16f = 0x822D,
         Rg32f = 0x8230,
-        Rgba32f = 0x8814,    
+        Rgba32f = 0x8814,
         R8ui = 0x8232,
         R8i = 0x8231,
         R16ui = 0x8234,
@@ -506,9 +506,9 @@ namespace MonoGame.OpenGL
         Float = 0x1406,
         HalfFloat = 0x140B,
         HalfFloatOES = 0x8D61,
-        Byte = 0x1400,    
-        Short = 0x1402,  
-        Int = 0x1404,    
+        Byte = 0x1400,
+        Short = 0x1402,
+        Int = 0x1404,
         UnsignedShort = 0x1403,
         UnsignedInt = 0x1405,
         UnsignedInt1010102 = 0x8036,
@@ -607,6 +607,11 @@ namespace MonoGame.OpenGL
     {
         ShaderStorage = 0x00002000,
         All = 0xFFFFFFFF,
+    }
+
+    internal enum AccessFlags : uint
+    {
+        GlMapReadBit = 0x1,
     }
 
     internal partial class ColorFormat
@@ -1404,6 +1409,12 @@ namespace MonoGame.OpenGL
         [System.Security.SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
+        internal delegate IntPtr MapBufferRangeDelegate(BufferTarget target, IntPtr offset, IntPtr size, AccessFlags access);
+        internal static MapBufferRangeDelegate MapBufferRange;
+
+        [System.Security.SuppressUnmanagedCodeSecurity()]
+        [UnmanagedFunctionPointer(callingConvention)]
+        [MonoNativeFunctionWrapper]
         internal delegate void UnmapBufferDelegate(BufferTarget target);
         internal static UnmapBufferDelegate UnmapBuffer;
 
@@ -1543,10 +1554,10 @@ namespace MonoGame.OpenGL
             UniformMatrix4fv = LoadFunction<UniformMatrix4fvDelegate> ("glUniformMatrix4fv");
             UniformMatrix2x3fv = LoadFunction<UniformMatrix2x3fvDelegate> ("glUniformMatrix2x3fv");
             UniformMatrix2x4fv = LoadFunction<UniformMatrix2x4fvDelegate> ("glUniformMatrix2x4fv");
-            UniformMatrix3x2fv = LoadFunction<UniformMatrix3x2fvDelegate> ("glUniformMatrix3x2fv"); 
+            UniformMatrix3x2fv = LoadFunction<UniformMatrix3x2fvDelegate> ("glUniformMatrix3x2fv");
             UniformMatrix3x4fv = LoadFunction<UniformMatrix3x4fvDelegate> ("glUniformMatrix3x4fv");
             UniformMatrix4x2fv = LoadFunction<UniformMatrix4x2fvDelegate> ("glUniformMatrix4x2fv");
-            UniformMatrix4x3fv = LoadFunction<UniformMatrix4x3fvDelegate> ("glUniformMatrix4x3fv");        
+            UniformMatrix4x3fv = LoadFunction<UniformMatrix4x3fvDelegate> ("glUniformMatrix4x3fv");
 
             ReadPixelsInternal = LoadFunction<ReadPixelsDelegate> ("glReadPixels");
 
@@ -1629,6 +1640,7 @@ namespace MonoGame.OpenGL
             GenBuffers = LoadFunction<GenBuffersDelegate> ("glGenBuffers");
             BufferData = LoadFunction<BufferDataDelegate> ("glBufferData");
             MapBuffer = LoadFunction<MapBufferDelegate> ("glMapBuffer");
+            MapBufferRange = LoadFunction<MapBufferRangeDelegate> ("glMapBufferRange");
             UnmapBuffer = LoadFunction<UnmapBufferDelegate> ("glUnmapBuffer");
             BufferSubData = LoadFunction<BufferSubDataDelegate> ("glBufferSubData");
             DeleteBuffers = LoadFunction<DeleteBuffersDelegate> ("glDeleteBuffers");
@@ -1701,7 +1713,7 @@ namespace MonoGame.OpenGL
                 GL.LoadFrameBufferObjectEXTEntryPoints();
             }
             if (GL.RenderbufferStorageMultisample == null)
-            {                
+            {
                 if (Extensions.Contains("GL_APPLE_framebuffer_multisample"))
                 {
                     GL.RenderbufferStorageMultisample = LoadFunction<GL.RenderbufferStorageMultisampleDelegate>("glRenderbufferStorageMultisampleAPPLE");
