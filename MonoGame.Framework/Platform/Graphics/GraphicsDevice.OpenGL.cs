@@ -362,6 +362,15 @@ namespace Microsoft.Xna.Framework.Graphics
             _bufferBindingInfos = new BufferBindingInfo[_maxVertexBufferSlots];
             for (int i = 0; i < _bufferBindingInfos.Length; i++)
                 _bufferBindingInfos[i] = new BufferBindingInfo(null, IntPtr.Zero, 0, -1);
+
+            // Create VAO
+            // Indirect drawing does not work without VAO on some platforms (Android for instance)
+            // (for some reason this does not work for a scalar, works only for an array)
+            var a = new uint[1];
+            var dataPtr = GCHandle.Alloc(a, GCHandleType.Pinned);
+            var vao = (UIntPtr) dataPtr.AddrOfPinnedObject();
+            GL.GenVertexArrays(1, vao);
+            GL.BindVertexArray(a[0]);
         }
 
         private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
@@ -643,8 +652,6 @@ namespace Microsoft.Xna.Framework.Graphics
         private Dictionary<RenderTargetBinding[], int> glFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
         // FBO cache used to resolve MSAA rendertargets, we create 1 FBO per RenderTargetBinding combination
         private Dictionary<RenderTargetBinding[], int> glResolveFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
-
-        private bool _vaoCreated;
 
         internal void PlatformCreateRenderTarget(IRenderTarget renderTarget, int width, int height, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
         {
@@ -1356,16 +1363,13 @@ namespace Microsoft.Xna.Framework.Graphics
             if (!GraphicsCapabilities.SupportsInstancing)
                 throw new PlatformNotSupportedException("Instanced geometry drawing requires at least OpenGL 3.2 or GLES 3.2. Try upgrading your graphics card drivers.");
 
+            GraphicsExtensions.CheckGLError();
+
             ApplyState(true);
 
             ApplyAttribs(_vertexShader, 0);
 
-            if (!_vaoCreated) {
-                UIntPtr vao =  new UIntPtr(4);
-                  GL.GenVertexArrays(1, vao);
-                //GL.BindVertexArray(vao);
-                _vaoCreated = true;
-            }
+
 
             // Set vertex count for tesselation patch
             var primitiveTypeGL = PrimitiveTypeGL(primitiveType);
