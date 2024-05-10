@@ -365,12 +365,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Create VAO
             // Indirect drawing does not work without VAO on some platforms (Android for instance)
-            // (for some reason this does not work for a scalar, works only for an array)
-            var a = new uint[1];
-            var dataPtr = GCHandle.Alloc(a, GCHandleType.Pinned);
-            var vao = (UIntPtr) dataPtr.AddrOfPinnedObject();
-            GL.GenVertexArrays(1, vao);
-            GL.BindVertexArray(a[0]);
+            // Check if function exist
+            if (GL.GenVertexArrays != null && GL.BindVertexArray != null) {
+                // (for some reason this does not work for a scalar, works only for an array)
+                var a = new uint[1];
+                var dataPtr = GCHandle.Alloc(a, GCHandleType.Pinned);
+                var vao = (UIntPtr) dataPtr.AddrOfPinnedObject();
+                GL.GenVertexArrays(1, vao);
+                GL.BindVertexArray(a[0]);
+            }
         }
 
         private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
