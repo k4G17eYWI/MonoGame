@@ -1475,6 +1475,23 @@ namespace MonoGame.OpenGL
         internal delegate void MemoryBarrierDelegate(MemoryBarrierBits barriers);
         internal static MemoryBarrierDelegate MemoryBarrier;
 
+        /**********************************************************************************/
+
+        [System.Security.SuppressUnmanagedCodeSecurity()]
+        [UnmanagedFunctionPointer(callingConvention)]
+        [MonoNativeFunctionWrapper]
+        internal delegate void GenVertexArraysDelegate(int n, UIntPtr size);
+        internal static GenVertexArraysDelegate GenVertexArrays;
+
+        [System.Security.SuppressUnmanagedCodeSecurity()]
+        [UnmanagedFunctionPointer(callingConvention)]
+        [MonoNativeFunctionWrapper]
+        internal delegate void BindVertexArrayDelegate(UIntPtr vao);
+        internal static BindVertexArrayDelegate BindVertexArray;
+
+        /**********************************************************************************/
+
+
 #if DEBUG
         [UnmanagedFunctionPointer (CallingConvention.StdCall)]
         delegate void DebugMessageCallbackProc (int source, int type, int id, int severity, int length, IntPtr message, IntPtr userParam);
@@ -1644,6 +1661,9 @@ namespace MonoGame.OpenGL
             UnmapBuffer = LoadFunction<UnmapBufferDelegate> ("glUnmapBuffer");
             BufferSubData = LoadFunction<BufferSubDataDelegate> ("glBufferSubData");
             DeleteBuffers = LoadFunction<DeleteBuffersDelegate> ("glDeleteBuffers");
+
+            GenVertexArrays = LoadFunction<GenVertexArraysDelegate> ("glGenVertexArrays");
+            BindVertexArray = LoadFunction<BindVertexArrayDelegate> ("glBindVertexArray");
 
             VertexAttribPointer = LoadFunction<VertexAttribPointerDelegate> ("glVertexAttribPointer");
 
